@@ -2,7 +2,7 @@ package substrate
 
 import (
 	"fmt"
-	scalecodec "github.com/itering/scale.go"
+	scale "github.com/itering/scale.go"
 	"github.com/itering/scale.go/types"
 	"github.com/itering/substrate-api-rpc/util"
 	"github.com/shopspring/decimal"
@@ -18,7 +18,7 @@ func DecodeExtrinsic(rawList []string, metadata *types.MetadataStruct, spec int)
 	}()
 	m := types.MetadataStruct(*metadata)
 	for _, extrinsicRaw := range rawList {
-		e := scalecodec.ExtrinsicDecoder{}
+		e := scale.ExtrinsicDecoder{}
 		option := types.ScaleDecoderOption{Metadata: &m, Spec: spec}
 		e.Init(types.ScaleBytes{Data: util.HexToBytes(extrinsicRaw)}, &option)
 		e.Process()

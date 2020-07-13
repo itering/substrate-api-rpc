@@ -2,7 +2,7 @@ package substrate
 
 import (
 	"fmt"
-	scalecodec "github.com/itering/scale.go"
+	scale "github.com/itering/scale.go"
 	"github.com/itering/scale.go/types"
 	"github.com/itering/substrate-api-rpc/util"
 )
@@ -15,7 +15,7 @@ func DecodeEvent(rawList string, metadata *types.MetadataStruct, spec int) (r in
 		}
 	}()
 	m := types.MetadataStruct(*metadata)
-	e := scalecodec.EventsDecoder{}
+	e := scale.EventsDecoder{}
 	option := types.ScaleDecoderOption{Metadata: &m, Spec: spec}
 	e.Init(types.ScaleBytes{Data: util.HexToBytes(rawList)}, &option)
 	e.Process()
