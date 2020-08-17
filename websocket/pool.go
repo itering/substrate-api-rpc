@@ -160,23 +160,25 @@ func (c *channelPool) wrapConn(conn *recws.RecConn) *PoolConn {
 
 var wsPool Pool
 
-func SendWsRequest(p *PoolConn, v interface{}, action []byte) (err error) {
+func SendWsRequest(p WsConn, v interface{}, action []byte) (err error) {
 	if p == nil {
-		p, err = Init()
-	}
-	if err != nil {
-		return
-	}
-	defer p.Close()
-	c := p.Conn
+		var pool *PoolConn
+		if pool, err = Init(); err == nil {
+			defer pool.Close()
+			p = pool.Conn
+		} else {
+			return
+		}
 
-	if err = c.WriteMessage(websocket.TextMessage, action); err != nil {
+	}
+
+	if err = p.WriteMessage(websocket.TextMessage, action); err != nil {
 		if p != nil {
 			p.MarkUnusable()
 		}
 		return fmt.Errorf("websocket send error: %v", err)
 	}
-	if err = c.ReadJSON(v); err != nil {
+	if err = p.ReadJSON(v); err != nil {
 		if p != nil {
 			p.MarkUnusable()
 		}

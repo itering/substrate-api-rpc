@@ -3,10 +3,22 @@ package websocket
 import (
 	"fmt"
 	"github.com/itering/substrate-api-rpc/pkg/recws"
+	"net/http"
 	"time"
 )
 
 var wsEndPoint = ""
+
+type WsConn interface {
+	Dial(urlStr string, reqHeader http.Header)
+	IsConnected() bool
+	Close()
+	WriteMessage(messageType int, data []byte) error
+	ReadMessage() (messageType int, message []byte, err error)
+	WriteJSON(v interface{}) error
+	ReadJSON(v interface{}) error
+	MarkUnusable()
+}
 
 func Init() (*PoolConn, error) {
 	var err error
@@ -27,11 +39,11 @@ func Init() (*PoolConn, error) {
 	return conn, err
 }
 
-func RegWSEndPoint(endpoint string) {
+func SetEndpoint(endpoint string) {
 	wsEndPoint = endpoint
 }
 
-func CloseWsConnection() {
+func Close() {
 	if wsPool != nil {
 		wsPool.Close()
 	}
