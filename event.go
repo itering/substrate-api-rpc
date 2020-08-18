@@ -4,11 +4,12 @@ import (
 	"fmt"
 	scale "github.com/itering/scale.go"
 	"github.com/itering/scale.go/types"
+	"github.com/itering/substrate-api-rpc/metadata"
 	"github.com/itering/substrate-api-rpc/util"
 )
 
 // Event decode
-func DecodeEvent(rawList string, metadata *types.MetadataStruct, spec int) (r interface{}, err error) {
+func DecodeEvent(rawList string, metadata *metadata.Instant, spec int) (r interface{}, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("Recovering from panic in DecodeEvent error is: %v \n", r)

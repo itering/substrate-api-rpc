@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"github.com/itering/substrate-api-rpc/metadata"
 	"strconv"
 	"strings"
 
@@ -12,7 +13,7 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-func Decode(raw string, decodeType string, metadata *types.MetadataStruct) (s StateStorage, err error) {
+func Decode(raw string, decodeType string, metadata *metadata.Instant) (s StateStorage, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("Recovering from panic in Decode error is: %v \n", r)

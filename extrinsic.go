@@ -4,13 +4,14 @@ import (
 	"fmt"
 	scale "github.com/itering/scale.go"
 	"github.com/itering/scale.go/types"
+	"github.com/itering/substrate-api-rpc/metadata"
 	"github.com/itering/substrate-api-rpc/util"
 	"github.com/shopspring/decimal"
 	"math"
 )
 
 // Extrinsic decode
-func DecodeExtrinsic(rawList []string, metadata *types.MetadataStruct, spec int) (r []map[string]interface{}, err error) {
+func DecodeExtrinsic(rawList []string, metadata *metadata.Instant, spec int) (r []map[string]interface{}, err error) {
 	defer func() {
 		if fatal := recover(); fatal != nil {
 			err = fmt.Errorf("Recovering from panic in DecodeExtrinsic error is: %v \n", fatal)

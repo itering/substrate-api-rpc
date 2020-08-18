@@ -5,7 +5,7 @@ go 1.12
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gorilla/websocket v1.4.2
-	github.com/itering/scale.go v0.1.4
+	github.com/itering/scale.go v0.2.4
 	github.com/jpillora/backoff v1.0.0
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/pierrec/xxHash v0.1.5

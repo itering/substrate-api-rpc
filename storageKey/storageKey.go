@@ -27,7 +27,7 @@ func EncodeStorageKey(section, method string, args ...string) (storageKey Storag
 	}
 
 	method = upperCamel(method)
-	prefix, storageType := metadata.ModuleStorageMapType(m, section, method)
+	prefix, storageType := moduleStorageMapType(m, section, method)
 	if storageType == nil {
 		return
 	}
@@ -105,4 +105,18 @@ func upperCamel(s string) string {
 	}
 	s = strings.ToUpper(string(s[0])) + string(s[1:])
 	return s
+}
+
+func moduleStorageMapType(m *metadata.Instant, section, method string) (string, *types.StorageType) {
+	modules := m.Metadata.Modules
+	for _, value := range modules {
+		if strings.EqualFold(strings.ToLower(value.Name), strings.ToLower(section)) {
+			for _, storage := range value.Storage {
+				if strings.EqualFold(strings.ToLower(storage.Name), strings.ToLower(method)) {
+					return value.Prefix, &storage.Type
+				}
+			}
+		}
+	}
+	return "", nil
 }

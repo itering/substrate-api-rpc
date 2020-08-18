@@ -4,7 +4,6 @@ import (
 	"github.com/itering/scale.go"
 	"github.com/itering/scale.go/types"
 	"github.com/itering/substrate-api-rpc/util"
-	"strings"
 )
 
 type RuntimeRaw struct {
@@ -12,13 +11,15 @@ type RuntimeRaw struct {
 	Raw  string
 }
 
+type Instant types.MetadataStruct
+
 var (
 	latestSpec      = -1
-	RuntimeMetadata = make(map[int]*types.MetadataStruct)
+	RuntimeMetadata = make(map[int]*Instant)
 	Decoder         *scalecodec.MetadataDecoder
 )
 
-func Latest(runtime *RuntimeRaw) *types.MetadataStruct {
+func Latest(runtime *RuntimeRaw) *Instant {
 	if latestSpec != -1 {
 		d := RuntimeMetadata[latestSpec]
 		return d
@@ -32,12 +33,12 @@ func Latest(runtime *RuntimeRaw) *types.MetadataStruct {
 
 	Decoder = &m
 	latestSpec = runtime.Spec
-
-	RuntimeMetadata[latestSpec] = &m.Metadata
-	return RuntimeMetadata[latestSpec]
+	instant := Instant(m.Metadata)
+	RuntimeMetadata[latestSpec] = &instant
+	return &instant
 }
 
-func Process(runtime *RuntimeRaw) *types.MetadataStruct {
+func Process(runtime *RuntimeRaw) *Instant {
 	if runtime == nil {
 		return nil
 	}
@@ -49,34 +50,22 @@ func Process(runtime *RuntimeRaw) *types.MetadataStruct {
 	m.Init(util.HexToBytes(runtime.Raw))
 	_ = m.Process()
 
-	RuntimeMetadata[runtime.Spec] = &m.Metadata
+	instant := Instant(m.Metadata)
+	RuntimeMetadata[runtime.Spec] = &instant
 
-	return RuntimeMetadata[runtime.Spec]
+	return &instant
 }
 
-func RegNewMetadataType(spec int, coded string) *types.MetadataStruct {
+func RegNewMetadataType(spec int, coded string) *Instant {
 	m := scalecodec.MetadataDecoder{}
 	m.Init(util.HexToBytes(coded))
 	_ = m.Process()
 
-	RuntimeMetadata[spec] = &m.Metadata
+	instant := Instant(m.Metadata)
+	RuntimeMetadata[spec] = &instant
 
 	if spec > latestSpec {
 		latestSpec = spec
 	}
-	return RuntimeMetadata[spec]
-}
-
-func ModuleStorageMapType(m *types.MetadataStruct, section, method string) (string, *types.StorageType) {
-	modules := m.Metadata.Modules
-	for _, value := range modules {
-		if strings.EqualFold(strings.ToLower(value.Name), strings.ToLower(section)) {
-			for _, storage := range value.Storage {
-				if strings.EqualFold(strings.ToLower(storage.Name), strings.ToLower(method)) {
-					return value.Prefix, &storage.Type
-				}
-			}
-		}
-	}
-	return "", nil
+	return &instant
 }
