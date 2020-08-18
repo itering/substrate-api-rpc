@@ -63,21 +63,11 @@ func (s *StateStorage) ToInt64() (r int64) {
 	return i
 }
 
-func (s *StateStorage) ToStakingLedgers() (r *StakingLedgers) {
-	_ = json.Unmarshal(s.bytes(), &r)
-	return
-}
-
 func (s *StateStorage) ToMapString() (r map[string]string) {
 	_ = json.Unmarshal(s.bytes(), &r)
 	return
 }
 func (s *StateStorage) ToMapInterface() (r map[string]interface{}) {
-	_ = json.Unmarshal(s.bytes(), &r)
-	return
-}
-
-func (s *StateStorage) ToExposures() (r *Exposures) {
 	_ = json.Unmarshal(s.bytes(), &r)
 	return
 }
@@ -88,11 +78,6 @@ func (s *StateStorage) ToRawAuraPreDigest() (r *RawAuraPreDigest) {
 }
 
 func (s *StateStorage) ToRawBabePreDigest() (r *RawBabePreDigest) {
-	_ = json.Unmarshal(s.bytes(), &r)
-	return
-}
-
-func (s *StateStorage) ToValidatorPrefsLegacy() (r *ValidatorPrefsLegacy) {
 	_ = json.Unmarshal(s.bytes(), &r)
 	return
 }
@@ -111,43 +96,4 @@ func (s *StateStorage) ToDecimal() (r decimal.Decimal) {
 		return decimal.Zero
 	}
 	return decimal.RequireFromString(strings.ReplaceAll(s.string(), "\"", ""))
-}
-
-func (s *StateStorage) ToBalanceLock() (r []BalanceLock) {
-	_ = json.Unmarshal(s.bytes(), &r)
-	return
-}
-
-func (s *StateStorage) ToEraPoints() (r *EraPoints) {
-	_ = json.Unmarshal(s.bytes(), &r)
-	return
-}
-
-func (s *StateStorage) ToRegistration() (r *Registration) {
-	_ = json.Unmarshal(s.bytes(), &r)
-	return
-}
-
-func (s *StateStorage) ToAccountData() (r *AccountData) {
-	_ = json.Unmarshal(s.bytes(), &r)
-	return
-}
-
-func (s *StateStorage) ToAccountInfo() (r *AccountInfo) {
-	_ = json.Unmarshal(s.bytes(), &r)
-	return
-}
-
-func (s *StateStorage) ToActiveEraInfo() (r *ActiveEraInfo) {
-	_ = json.Unmarshal(s.bytes(), &r)
-	return
-}
-
-func (s *StateStorage) ToProposal() (r *Proposal) {
-	_ = json.Unmarshal(s.bytes(), &r)
-	return
-}
-func (s *StateStorage) ToReferendumInfo() (r *ReferendumInfo) {
-	_ = json.Unmarshal(s.bytes(), &r)
-	return
 }
