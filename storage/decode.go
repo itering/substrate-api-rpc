@@ -87,7 +87,12 @@ func (s *StateStorage) ToU32FromCodec() (r uint32) {
 	if s.string() == "" {
 		return 0
 	}
-	return uint32(binary.LittleEndian.Uint32(util.HexToBytes(s.string())[0:4]))
+	return binary.LittleEndian.Uint32(util.HexToBytes(s.string())[0:4])
+}
+
+func (s *StateStorage) ToAny(any interface{}) {
+	_ = json.Unmarshal(s.bytes(), any)
+	return
 }
 
 // ToDecimal
