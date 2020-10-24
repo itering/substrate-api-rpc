@@ -3,6 +3,7 @@ package rpc
 import (
 	"encoding/json"
 	"errors"
+
 	"github.com/shopspring/decimal"
 )
 
@@ -41,7 +42,7 @@ type SubParams struct {
 }
 
 type HealthResult struct {
-	IsSyncing       bool `json:"is_syncing"`
+	IsSyncing       bool `json:"isSyncing"`
 	Peers           int  `json:"peers"`
 	ShouldHavePeers bool `json:"shouldHavePeers"`
 }
