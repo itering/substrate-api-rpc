@@ -28,7 +28,7 @@ func Init() (*PoolConn, error) {
 			SubscribeConn.Dial(wsEndPoint, nil)
 			return SubscribeConn, err
 		}
-		if wsPool, err = NewChannelPool(1, 10, factory); err != nil {
+		if wsPool, err = NewChannelPool(1, 25, factory); err != nil {
 			fmt.Println("NewChannelPool", err)
 		}
 	}
