@@ -18,6 +18,7 @@ type WsConn interface {
 	WriteJSON(v interface{}) error
 	ReadJSON(v interface{}) error
 	MarkUnusable()
+	CloseAndReconnect()
 }
 
 func Init() (*PoolConn, error) {
