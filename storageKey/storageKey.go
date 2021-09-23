@@ -1,12 +1,12 @@
 package storageKey
 
 import (
-	"fmt"
+	"strings"
+
 	"github.com/itering/scale.go/types"
 	"github.com/itering/substrate-api-rpc/hasher"
 	"github.com/itering/substrate-api-rpc/metadata"
 	"github.com/itering/substrate-api-rpc/util"
-	"strings"
 )
 
 type StorageKey struct {
@@ -32,7 +32,7 @@ func EncodeStorageKey(section, method string, args ...string) (storageKey Storag
 		return
 	}
 
-	mapType := checkoutHasherAndType(storageType, args...)
+	mapType := checkoutHasherAndType(storageType)
 	if mapType == nil {
 		return
 	}
@@ -40,9 +40,6 @@ func EncodeStorageKey(section, method string, args ...string) (storageKey Storag
 	storageKey.ScaleType = mapType.Value
 
 	var hash []byte
-
-	method = dealLinkedMethod(method, mapType, args...)
-
 	sectionHash := hasher.HashByCryptoName([]byte(upperCamel(prefix)), "Twox128")
 	methodHash := hasher.HashByCryptoName([]byte(method), "Twox128")
 
@@ -67,36 +64,30 @@ type storageOption struct {
 	IsLinked bool   `json:"is_linked"`
 }
 
-func checkoutHasherAndType(t *types.StorageType, arg ...string) *storageOption {
+func checkoutHasherAndType(t *types.StorageType) *storageOption {
 	option := storageOption{}
 	switch t.Origin {
 	case "MapType":
 		option.Value = t.MapType.Value
 		option.Hasher = t.MapType.Hasher
-		if option.IsLinked = t.MapType.IsLinked; option.IsLinked {
-			if len(arg) == 0 && option.Value == "ValidatorPrefs" {
-				option.Value = "AccountId" // waiting validator
-			} else {
-				option.Value = fmt.Sprintf("(%s, Linkage<AccountId>)", option.Value)
-			}
-		}
 	case "DoubleMapType":
 		option.Value = t.DoubleMapType.Value
 		option.Hasher = t.DoubleMapType.Hasher
 		option.Hasher2 = t.DoubleMapType.Key2Hasher
 		option.IsLinked = t.DoubleMapType.IsLinked
+	case "Map":
+		option.Value = t.NMapType.Value
+		if len(t.NMapType.Hashers) == 1 {
+			option.Hasher = t.NMapType.Hashers[0]
+		}
+		if len(t.NMapType.Hashers) == 2 {
+			option.Hasher2 = t.NMapType.Hashers[1]
+		}
 	default:
 		option.Value = *t.PlainType
 		option.Hasher = "Twox64Concat"
 	}
 	return &option
-}
-
-func dealLinkedMethod(method string, t *storageOption, arg ...string) string {
-	if t.IsLinked && len(arg) == 0 {
-		method = fmt.Sprintf("HeadOf%s", method)
-	}
-	return method
 }
 
 func upperCamel(s string) string {
