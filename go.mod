@@ -4,7 +4,7 @@ go 1.12
 
 require (
 	github.com/gorilla/websocket v1.4.2
-	github.com/itering/scale.go v1.1.22
+	github.com/itering/scale.go v1.1.24
 	github.com/jpillora/backoff v1.0.0
 	github.com/pierrec/xxHash v0.1.5
 	github.com/shopspring/decimal v1.2.0

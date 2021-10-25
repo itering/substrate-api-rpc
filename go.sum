@@ -10,6 +10,8 @@ github.com/itering/scale.go v1.1.21 h1:fMcP4l6HxyXAsamkoJCUTEy7jVnyYePJvZ8mOhO7h
 github.com/itering/scale.go v1.1.21/go.mod h1:Eg8T/07SKybkN9E1LmiEdSN/pLtV4rZDN9zuj486Gbs=
 github.com/itering/scale.go v1.1.22 h1:lpWkLroMa4fXOXUKYSaNW0PxsKpG2R+lcyxLvG0oppg=
 github.com/itering/scale.go v1.1.22/go.mod h1:Eg8T/07SKybkN9E1LmiEdSN/pLtV4rZDN9zuj486Gbs=
+github.com/itering/scale.go v1.1.24 h1:ulegaI5Sc1etEAWZJf8TKrEmYe+ZexOO6iRfVBJKGOE=
+github.com/itering/scale.go v1.1.24/go.mod h1:Eg8T/07SKybkN9E1LmiEdSN/pLtV4rZDN9zuj486Gbs=
 github.com/jpillora/backoff v1.0.0 h1:uvFg412JmmHBHw7iwprIxkPMI+sGQ4kzOWsMeHnm2EA=
 github.com/jpillora/backoff v1.0.0/go.mod h1:J/6gKK9jxlEcS3zixgDgUAsiuZ7yrSoa/FX5e0EB2j4=
 github.com/pierrec/xxHash v0.1.5 h1:n/jBpwTHiER4xYvK3/CdPVnLDPchj8eTJFFLUb4QHBo=
