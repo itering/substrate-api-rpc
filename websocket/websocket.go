@@ -2,9 +2,10 @@ package websocket
 
 import (
 	"fmt"
-	"github.com/itering/substrate-api-rpc/pkg/recws"
 	"net/http"
 	"time"
+
+	"github.com/itering/substrate-api-rpc/pkg/recws"
 )
 
 var wsEndPoint = ""
@@ -21,7 +22,7 @@ type WsConn interface {
 	CloseAndReconnect()
 }
 
-func Init() (*PoolConn, error) {
+func Init(options ...Option) (*PoolConn, error) {
 	var err error
 	if wsPool == nil {
 		factory := func() (*recws.RecConn, error) {
@@ -32,6 +33,9 @@ func Init() (*PoolConn, error) {
 				NonVerbose:       true,
 				HandshakeTimeout: time.Second}
 			SubscribeConn.Dial(wsEndPoint, nil)
+			for _, o := range options {
+				o.Apply(SubscribeConn)
+			}
 			return SubscribeConn, err
 		}
 		if wsPool, err = NewChannelPool(1, 25, factory); err != nil {
@@ -53,4 +57,32 @@ func Close() {
 	if wsPool != nil {
 		wsPool.Close()
 	}
+}
+
+type Option interface {
+	Apply(*recws.RecConn)
+}
+
+type OptionFunc func(*recws.RecConn)
+
+func (f OptionFunc) Apply(conn *recws.RecConn) {
+	f(conn)
+}
+
+func WithHandshakeTimeout(t time.Duration) Option {
+	return OptionFunc(func(m *recws.RecConn) {
+		m.HandshakeTimeout = t
+	})
+}
+
+func WithWriteTimeoutTimeout(t time.Duration) Option {
+	return OptionFunc(func(m *recws.RecConn) {
+		m.WriteTimeout = t
+	})
+}
+
+func WithReadTimeoutTimeout(t time.Duration) Option {
+	return OptionFunc(func(m *recws.RecConn) {
+		m.ReadTimeout = t
+	})
 }
