@@ -8,7 +8,10 @@ import (
 	"github.com/itering/substrate-api-rpc/pkg/recws"
 )
 
-var wsEndPoint = ""
+var (
+	wsEndPoint = ""
+	maxCap     = 25
+)
 
 type WsConn interface {
 	Dial(urlStr string, reqHeader http.Header)
@@ -38,7 +41,7 @@ func Init(options ...Option) (*PoolConn, error) {
 			}
 			return SubscribeConn, err
 		}
-		if wsPool, err = NewChannelPool(1, 25, factory); err != nil {
+		if wsPool, err = NewChannelPool(1, maxCap, factory); err != nil {
 			fmt.Println("NewChannelPool", err)
 		}
 	}
@@ -51,6 +54,11 @@ func Init(options ...Option) (*PoolConn, error) {
 
 func SetEndpoint(endpoint string) {
 	wsEndPoint = endpoint
+}
+
+// SetChannelPoolMaxCap set connection pool max cap
+func SetChannelPoolMaxCap(max int) {
+	maxCap = max
 }
 
 func Close() {
