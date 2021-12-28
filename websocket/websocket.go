@@ -35,10 +35,10 @@ func Init(options ...Option) (*PoolConn, error) {
 				ReadTimeout:      time.Second * 2,
 				NonVerbose:       true,
 				HandshakeTimeout: time.Second}
-			SubscribeConn.Dial(wsEndPoint, nil)
 			for _, o := range options {
 				o.Apply(SubscribeConn)
 			}
+			SubscribeConn.Dial(wsEndPoint, nil)
 			return SubscribeConn, err
 		}
 		if wsPool, err = NewChannelPool(1, maxCap, factory); err != nil {
