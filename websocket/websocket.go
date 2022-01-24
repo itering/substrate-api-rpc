@@ -94,3 +94,15 @@ func WithReadTimeoutTimeout(t time.Duration) Option {
 		m.ReadTimeout = t
 	})
 }
+
+func WithReadBufferSize(size int) Option {
+	return OptionFunc(func(m *recws.RecConn) {
+		m.ReadBufferSize = size
+	})
+}
+
+func WithWriteBufferSize(size int) Option {
+	return OptionFunc(func(m *recws.RecConn) {
+		m.WriteBufferSize = size
+	})
+}

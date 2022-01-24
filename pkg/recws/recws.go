@@ -44,6 +44,8 @@ type RecConn struct {
 	KeepAliveTimeout time.Duration
 	ReadTimeout      time.Duration
 	WriteTimeout     time.Duration
+	WriteBufferSize  int
+	ReadBufferSize   int
 	NonVerbose       bool
 
 	isConnected bool
@@ -280,6 +282,12 @@ func (rc *RecConn) setDefaultDialer(handshakeTimeout time.Duration) {
 		HandshakeTimeout: handshakeTimeout,
 		Proxy:            rc.Proxy,
 		TLSClientConfig:  &tls.Config{RootCAs: nil, InsecureSkipVerify: true},
+	}
+	if rc.WriteBufferSize > 0 {
+		rc.dialer.WriteBufferSize = rc.WriteBufferSize
+	}
+	if rc.ReadBufferSize > 0 {
+		rc.dialer.ReadBufferSize = rc.ReadBufferSize
 	}
 }
 
