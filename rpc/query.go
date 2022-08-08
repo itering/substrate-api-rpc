@@ -2,11 +2,12 @@ package rpc
 
 import (
 	"fmt"
+	"math/rand"
+
 	"github.com/itering/substrate-api-rpc/storage"
 	"github.com/itering/substrate-api-rpc/storageKey"
 	"github.com/itering/substrate-api-rpc/util"
 	"github.com/itering/substrate-api-rpc/websocket"
-	"math/rand"
 )
 
 // Read substrate storage
@@ -18,7 +19,7 @@ func ReadStorage(p websocket.WsConn, module, prefix string, hash string, arg ...
 	}
 	if dataHex, err := v.ToString(); err == nil {
 		if dataHex == "" {
-			return storage.StateStorage(""), nil
+			return "", nil
 		}
 		return storage.Decode(dataHex, key.ScaleType, nil)
 	}
