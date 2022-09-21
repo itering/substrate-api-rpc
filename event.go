@@ -2,13 +2,15 @@ package substrate
 
 import (
 	"fmt"
+
 	scale "github.com/itering/scale.go"
 	"github.com/itering/scale.go/types"
+	"github.com/itering/scale.go/types/scaleBytes"
 	"github.com/itering/substrate-api-rpc/metadata"
 	"github.com/itering/substrate-api-rpc/util"
 )
 
-// Event decode
+// DecodeEvent Event decode
 func DecodeEvent(rawList string, metadata *metadata.Instant, spec int) (r interface{}, err error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -18,7 +20,7 @@ func DecodeEvent(rawList string, metadata *metadata.Instant, spec int) (r interf
 	m := types.MetadataStruct(*metadata)
 	e := scale.EventsDecoder{}
 	option := types.ScaleDecoderOption{Metadata: &m, Spec: spec}
-	e.Init(types.ScaleBytes{Data: util.HexToBytes(rawList)}, &option)
+	e.Init(scaleBytes.ScaleBytes{Data: util.HexToBytes(rawList)}, &option)
 	e.Process()
 	return e.Value, nil
 }

@@ -3,9 +3,10 @@ package websocket
 import (
 	"errors"
 	"fmt"
+	"sync"
+
 	"github.com/gorilla/websocket"
 	"github.com/itering/substrate-api-rpc/pkg/recws"
-	"sync"
 )
 
 var (
@@ -169,13 +170,13 @@ func SendWsRequest(c WsConn, v interface{}, action []byte) (err error) {
 		defer p.Close()
 		c = p.Conn
 	}
-	if err = p.Conn.WriteMessage(websocket.TextMessage, action); err != nil {
+	if err = c.WriteMessage(websocket.TextMessage, action); err != nil {
 		if p != nil {
 			p.MarkUnusable()
 		}
 		return fmt.Errorf("websocket send error: %v", err)
 	}
-	if err = p.Conn.ReadJSON(v); err != nil {
+	if err = c.ReadJSON(v); err != nil {
 		if p != nil {
 			p.MarkUnusable()
 		}

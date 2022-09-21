@@ -2,12 +2,14 @@ package substrate
 
 import (
 	"fmt"
+	"math"
+
 	scale "github.com/itering/scale.go"
 	"github.com/itering/scale.go/types"
+	"github.com/itering/scale.go/types/scaleBytes"
 	"github.com/itering/substrate-api-rpc/metadata"
 	"github.com/itering/substrate-api-rpc/util"
 	"github.com/shopspring/decimal"
-	"math"
 )
 
 // Extrinsic decode
@@ -21,7 +23,7 @@ func DecodeExtrinsic(rawList []string, metadata *metadata.Instant, spec int) (r 
 	for _, extrinsicRaw := range rawList {
 		e := scale.ExtrinsicDecoder{}
 		option := types.ScaleDecoderOption{Metadata: &m, Spec: spec}
-		e.Init(types.ScaleBytes{Data: util.HexToBytes(extrinsicRaw)}, &option)
+		e.Init(scaleBytes.ScaleBytes{Data: util.HexToBytes(extrinsicRaw)}, &option)
 		e.Process()
 		r = append(r, e.Value.(map[string]interface{}))
 	}
@@ -44,7 +46,6 @@ func DecodeMortal(era string) *Mortal {
 	var period uint64 = 2 << (encoded % (1 << 4))
 	quantizeFactor := math.Max(float64(period>>12), 1)
 	phase := (encoded >> 4) * uint64(quantizeFactor)
-	fmt.Println(period, phase)
 	return &Mortal{
 		Period: period,
 		Phase:  phase,
