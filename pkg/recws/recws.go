@@ -110,9 +110,6 @@ func (rc *RecConn) ReadMessage() (messageType int, message []byte, err error) {
 			messageType, message, err = rc.Conn.ReadMessage()
 		}
 		rc.mu.Unlock()
-		if err != nil {
-			// rc.Close()
-		}
 	}
 
 	return
@@ -133,9 +130,6 @@ func (rc *RecConn) WriteMessage(messageType int, data []byte) error {
 			err = rc.Conn.WriteMessage(messageType, data)
 		}
 		rc.mu.Unlock()
-		if err != nil {
-			// rc.Close()
-		}
 	}
 
 	return err
@@ -158,9 +152,6 @@ func (rc *RecConn) WriteJSON(v interface{}) error {
 			err = rc.Conn.WriteJSON(v)
 		}
 		rc.mu.Unlock()
-		if err != nil {
-			// rc.Close()
-		}
 	}
 
 	return err
@@ -184,9 +175,6 @@ func (rc *RecConn) ReadJSON(v interface{}) error {
 			err = rc.Conn.ReadJSON(v)
 		}
 		rc.mu.Unlock()
-		if err != nil {
-			// rc.Close()
-		}
 	}
 
 	return err
@@ -326,7 +314,6 @@ func (rc *RecConn) Dial(urlStr string, reqHeader http.Header) {
 
 	// wait on first attempt
 	time.Sleep(rc.getHandshakeTimeout())
-	return
 }
 
 // GetURL returns current connection url
@@ -394,22 +381,20 @@ func (rc *RecConn) keepAlive() {
 		defer ticker.Stop()
 
 		for {
-			select {
-			default:
-				if !rc.IsConnected() {
-					continue
-				}
-
-				if err := rc.writeControlPingMessage(); err != nil {
-					log.Println(err)
-				}
-
-				<-ticker.C
-				if time.Since(keepAliveResponse.getLastResponse()) > rc.getKeepAliveTimeout() {
-					rc.Close()
-					return
-				}
+			if !rc.IsConnected() {
+				continue
 			}
+
+			if err := rc.writeControlPingMessage(); err != nil {
+				log.Println(err)
+			}
+
+			<-ticker.C
+			if time.Since(keepAliveResponse.getLastResponse()) > rc.getKeepAliveTimeout() {
+				rc.Close()
+				return
+			}
+
 		}
 	}()
 }
@@ -419,45 +404,43 @@ func (rc *RecConn) connect() {
 	rand.Seed(time.Now().UTC().UnixNano())
 LOOP:
 	for {
-		select {
-		default:
-			nextItvl := b.Duration()
-			wsConn, httpResp, err := rc.dialer.Dial(rc.url, rc.reqHeader)
-			if err != nil {
-				break LOOP
-			}
-			rc.mu.Lock()
-			rc.Conn = wsConn
-			rc.dialErr = err
-			rc.isConnected = err == nil
-			rc.httpResp = httpResp
-			rc.mu.Unlock()
+		nextItvl := b.Duration()
+		wsConn, httpResp, err := rc.dialer.Dial(rc.url, rc.reqHeader)
+		if err != nil {
+			break LOOP
+		}
+		rc.mu.Lock()
+		rc.Conn = wsConn
+		rc.dialErr = err
+		rc.isConnected = err == nil
+		rc.httpResp = httpResp
+		rc.mu.Unlock()
 
-			if err == nil {
-				if !rc.getNonVerbose() {
+		if err == nil {
+			if !rc.getNonVerbose() {
 
-					if !rc.hasSubscribeHandler() {
-						return
-					}
-
-					if err := rc.SubscribeHandler(); err != nil {
-						log.Fatalf("Dial: connect handler failed with %s", err.Error())
-					}
-
-					if rc.getKeepAliveTimeout() != 0 {
-						rc.keepAlive()
-					}
+				if !rc.hasSubscribeHandler() {
+					return
 				}
 
-				return
+				if err := rc.SubscribeHandler(); err != nil {
+					log.Fatalf("Dial: connect handler failed with %s", err.Error())
+				}
+
+				if rc.getKeepAliveTimeout() != 0 {
+					rc.keepAlive()
+				}
 			}
 
-			if !rc.getNonVerbose() {
-				log.Println(err, "Dial: will try again in", nextItvl, "seconds.")
-			}
-
-			time.Sleep(nextItvl)
+			return
 		}
+
+		if !rc.getNonVerbose() {
+			log.Println(err, "Dial: will try again in", nextItvl, "seconds.")
+		}
+
+		time.Sleep(nextItvl)
+
 	}
 }
 

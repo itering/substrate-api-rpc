@@ -3,7 +3,9 @@ package substrate
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/itering/scale.go/types"
+	"github.com/itering/scale.go/types/scaleBytes"
 	"github.com/itering/substrate-api-rpc/storage"
 	"github.com/itering/substrate-api-rpc/util"
 )
@@ -75,7 +77,7 @@ func DecodeLogDigest(rawList []string) (r []storage.DecoderLog, err error) {
 	}()
 	for _, logRaw := range rawList {
 		m := types.ScaleDecoder{}
-		m.Init(types.ScaleBytes{Data: util.HexToBytes(logRaw)}, nil)
+		m.Init(scaleBytes.ScaleBytes{Data: util.HexToBytes(logRaw)}, nil)
 		rb := m.ProcessAndUpdateData("LogDigest").(map[string]interface{})
 
 		var log storage.DecoderLog

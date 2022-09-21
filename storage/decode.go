@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/itering/scale.go/types"
+	"github.com/itering/scale.go/types/scaleBytes"
 	"github.com/itering/substrate-api-rpc/util"
 	"github.com/shopspring/decimal"
 )
@@ -19,7 +20,7 @@ func Decode(raw string, decodeType string, option *types.ScaleDecoderOption) (s 
 		}
 	}()
 	m := types.ScaleDecoder{}
-	m.Init(types.ScaleBytes{Data: util.HexToBytes(raw)}, option)
+	m.Init(scaleBytes.ScaleBytes{Data: util.HexToBytes(raw)}, option)
 	return StateStorage(util.InterfaceToString(m.ProcessAndUpdateData(decodeType))), nil
 }
 
@@ -85,7 +86,6 @@ func (s *StateStorage) ToU32FromCodec() (r uint32) {
 
 func (s *StateStorage) ToAny(any interface{}) {
 	_ = json.Unmarshal(s.bytes(), any)
-	return
 }
 
 // ToDecimal
