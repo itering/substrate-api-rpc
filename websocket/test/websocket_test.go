@@ -38,7 +38,11 @@ func TestMultiInit(t *testing.T) {
 
 	v := &rpc.JsonRpcResult{}
 	websocket.SendWsRequest("", nil, v, rpc.ChainGetBlockHash(1, 1))
-	t.Log(v)
+	if v.Result.(string) != "0xc0096358534ec8d21d01d34b836eed476a1c343f8724fa2153dc0725ad797a90" {
+		t.Fatal(v)
+	} else {
+		t.Log(v)
+	}
 
 	// 2.westend client
 	const (
@@ -57,5 +61,9 @@ func TestMultiInit(t *testing.T) {
 
 	v2 := &rpc.JsonRpcResult{}
 	websocket.SendWsRequest(Westend, nil, v2, rpc.ChainGetBlockHash(1, 1))
-	t.Log(v2)
+	if v2.Result.(string) != "0x44ef51c86927a1e2da55754dba9684dd6ff9bac8c61624ffe958be656c42e036" {
+		t.Fatal(v2)
+	} else {
+		t.Log(v2)
+	}
 }
