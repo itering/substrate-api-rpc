@@ -159,12 +159,18 @@ func (c *channelPool) wrapConn(conn *recws.RecConn) *PoolConn {
 	return p
 }
 
-var wsPool Pool
+type NodeName string
 
-func SendWsRequest(c WsConn, v interface{}, action []byte) (err error) {
+const (
+	DefaultNodeName NodeName = "default"
+)
+
+var wsPool = make(map[NodeName]Pool)
+
+func SendWsRequest(nodeName NodeName, c WsConn, v interface{}, action []byte) (err error) {
 	var p *PoolConn
 	if c == nil {
-		if p, err = Init(); err != nil {
+		if p, err = Init(nodeName); err != nil {
 			return
 		}
 		defer p.Close()

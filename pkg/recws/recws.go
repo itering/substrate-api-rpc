@@ -48,6 +48,10 @@ type RecConn struct {
 	ReadBufferSize   int
 	NonVerbose       bool
 
+	NodeName   string
+	EndPoint   string
+	MaxPoolCap int
+
 	isConnected bool
 	mu          sync.RWMutex
 	url         string

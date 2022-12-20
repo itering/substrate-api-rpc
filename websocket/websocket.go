@@ -8,11 +8,6 @@ import (
 	"github.com/itering/substrate-api-rpc/pkg/recws"
 )
 
-var (
-	wsEndPoint = ""
-	maxCap     = 25
-)
-
 type WsConn interface {
 	Dial(urlStr string, reqHeader http.Header)
 	IsConnected() bool
@@ -25,9 +20,16 @@ type WsConn interface {
 	CloseAndReconnect()
 }
 
-func Init(options ...Option) (*PoolConn, error) {
-	var err error
-	if wsPool == nil {
+func Init(nodeName NodeName, options ...Option) (*PoolConn, error) {
+	if nodeName == "" {
+		nodeName = DefaultNodeName
+	}
+
+	var (
+		err    error
+		maxCap = 25
+	)
+	if _, ok := wsPool[nodeName]; !ok {
 		factory := func() (*recws.RecConn, error) {
 			SubscribeConn := &recws.RecConn{
 				KeepAliveTimeout: 10 * time.Second,
@@ -38,32 +40,29 @@ func Init(options ...Option) (*PoolConn, error) {
 			for _, o := range options {
 				o.Apply(SubscribeConn)
 			}
-			SubscribeConn.Dial(wsEndPoint, nil)
+
+			SubscribeConn.Dial(SubscribeConn.EndPoint, nil)
+
+			if SubscribeConn.MaxPoolCap > 0 {
+				maxCap = SubscribeConn.MaxPoolCap
+			}
+
 			return SubscribeConn, err
 		}
-		if wsPool, err = NewChannelPool(1, maxCap, factory); err != nil {
+		if wsPool[nodeName], err = NewChannelPool(1, maxCap, factory); err != nil {
 			fmt.Println("NewChannelPool", err)
 		}
 	}
 	if err != nil {
 		return nil, err
 	}
-	conn, err := wsPool.Get()
+	conn, err := wsPool[nodeName].Get()
 	return conn, err
 }
 
-func SetEndpoint(endpoint string) {
-	wsEndPoint = endpoint
-}
-
-// SetChannelPoolMaxCap set connection pool max cap
-func SetChannelPoolMaxCap(max int) {
-	maxCap = max
-}
-
-func Close() {
-	if wsPool != nil {
-		wsPool.Close()
+func Close(nodeName NodeName) {
+	if pool, ok := wsPool[nodeName]; ok && pool != nil {
+		pool.Close()
 	}
 }
 
@@ -104,5 +103,17 @@ func WithReadBufferSize(size int) Option {
 func WithWriteBufferSize(size int) Option {
 	return OptionFunc(func(m *recws.RecConn) {
 		m.WriteBufferSize = size
+	})
+}
+
+func WithEndPoint(endPoint string) Option {
+	return OptionFunc(func(m *recws.RecConn) {
+		m.EndPoint = endPoint
+	})
+}
+
+func WithMaxPoolCap(cap int) Option {
+	return OptionFunc(func(m *recws.RecConn) {
+		m.MaxPoolCap = cap
 	})
 }
