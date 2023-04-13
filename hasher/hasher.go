@@ -5,7 +5,7 @@ import (
 	"golang.org/x/crypto/blake2b"
 )
 
-// HashByCryptoName
+// HashByCryptoName returns the hash of the given data using the given hasher.
 func HashByCryptoName(p []byte, hasher string) []byte {
 	switch hasher {
 	case "Blake2_128":

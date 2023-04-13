@@ -3,6 +3,7 @@ module github.com/itering/substrate-api-rpc
 go 1.16
 
 require (
+	github.com/ChainSafe/go-schnorrkel v1.0.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/huandu/xstrings v1.4.0 // indirect
 	github.com/itering/scale.go v1.5.9
@@ -14,4 +15,8 @@ require (
 	github.com/stretchr/testify v1.7.1
 	golang.org/x/crypto v0.6.0
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
+)
+
+replace (
+	github.com/itering/scale.go => github.com/gmajor-encrypt/scale.go v0.0.0-20230406095450-238aeb97f19c
 )

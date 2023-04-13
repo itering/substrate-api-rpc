@@ -1,6 +1,8 @@
 package metadata
 
 import (
+	"strings"
+
 	"github.com/itering/scale.go"
 	"github.com/itering/scale.go/types"
 	"github.com/itering/substrate-api-rpc/util"
@@ -68,4 +70,15 @@ func RegNewMetadataType(spec int, coded string) *Instant {
 		latestSpec = spec
 	}
 	return &instant
+}
+
+func (m *Instant) FindCallCallName(moduleName, callName string) *types.MetadataCalls {
+	for index, v := range m.CallIndex {
+		if strings.EqualFold(v.Call.Name, callName) && strings.EqualFold(v.Module.Name, moduleName) {
+			call := v.Call
+			call.Lookup = index
+			return &call
+		}
+	}
+	return nil
 }

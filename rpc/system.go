@@ -99,21 +99,31 @@ func SystemPaymentQueryInfo(id int, encodedExtrinsic string) []byte {
 	return rpc.structureQuery()
 }
 
-func PowerOf(id int, address string) []byte {
-	rpc := Param{Id: id, Method: "staking_powerOf", Params: []string{address}}
-	return rpc.structureQuery()
-}
-
-// Query historical storage entries (by key) starting from a start block
+// StateQueryStorage Query historical storage entries (by key) starting from a start block
 // key Vec<StorageKey>
-func StateQuerystorage(id int, key, start, end string) []byte {
+func StateQueryStorage(id int, key, start, end string) []byte {
 	rpc := Param{Id: id, Method: "state_queryStorage", Params: []string{key, start, end}}
 	return rpc.structureQuery()
 }
 
-//  Query storage entries (by key) starting at block hash given as the second parameter
+// StateQueryStorageAt Query storage entries (by key) starting at block hash given as the second parameter
 // key Vec<StorageKey>
 func StateQueryStorageAt(id int, key, start string) []byte {
 	rpc := Param{Id: id, Method: "state_queryStorageAt", Params: []string{key, start}}
+	return rpc.structureQuery()
+}
+
+// StateGetRuntimeVersion Query the runtime version
+func StateGetRuntimeVersion(id int, hash string) []byte {
+	rpc := Param{Id: id, Method: "state_getRuntimeVersion", Params: []string{}}
+	if hash != "" {
+		rpc = Param{Id: id, Method: "state_getRuntimeVersion", Params: []string{hash}}
+	}
+	return rpc.structureQuery()
+}
+
+// SystemAccountNextIndex Query the next account index of an account
+func SystemAccountNextIndex(id int, hash string) []byte {
+	rpc := Param{Id: id, Method: "system_accountNextIndex", Params: []string{hash}}
 	return rpc.structureQuery()
 }
