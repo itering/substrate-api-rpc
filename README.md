@@ -120,4 +120,4 @@ We welcome contributions of any kind. Issues labeled can be good (first) contrib
 
 ## LICENSE
 
-GPL-3.0
+Apache-2.0

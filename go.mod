@@ -6,7 +6,7 @@ require (
 	github.com/ChainSafe/go-schnorrkel v1.0.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/huandu/xstrings v1.4.0 // indirect
-	github.com/itering/scale.go v1.5.12
+	github.com/itering/scale.go v1.6.0
 	github.com/jpillora/backoff v1.0.0
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/pierrec/xxHash v0.1.5
@@ -16,8 +16,4 @@ require (
 	github.com/stretchr/testify v1.7.1
 	golang.org/x/crypto v0.8.0
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
-)
-
-replace (
-	github.com/itering/scale.go => github.com/gmajor-encrypt/scale.go v0.0.0-20230406095450-238aeb97f19c
 )

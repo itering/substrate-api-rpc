@@ -1,7 +1,6 @@
 package rpc
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -47,7 +46,7 @@ func (cl *Client) SendAuthorSubmitAndWatchExtrinsic(signedExtrinsic string) (str
 		if p, err = websocket.Init(); err != nil {
 			return "", nil
 		}
-		defer p.Close()
+		defer p.Close() // nolint: errcheck
 		cl.p = p.Conn
 	}
 	if err = p.Conn.WriteMessage(gorilla.TextMessage, AuthorSubmitAndWatchExtrinsic(rand.Intn(1000), signedExtrinsic)); err != nil {
@@ -64,8 +63,6 @@ func (cl *Client) SendAuthorSubmitAndWatchExtrinsic(signedExtrinsic string) (str
 			}
 			return "", fmt.Errorf("websocket read error: %v", err)
 		}
-		b, _ := json.Marshal(v)
-		fmt.Println(string(b))
 		if err = v.CheckErr(); err != nil {
 			return "", err
 		}
@@ -151,7 +148,11 @@ func (cl *Client) SignTransaction(moduleName, callName string, args ...interface
 	genericExtrinsic.SignatureRaw = map[string]interface{}{string(cl.keyRing.Type()): cl.keyRing.Sign(util.AddHex(payload))}
 
 	// send extrinsic will return hash
-	return util.AddHex(genericExtrinsic.EncodeWithOpt(opt)), nil
+	encodedExtrinsic, err := genericExtrinsic.Encode(opt)
+	if err != nil {
+		return "", err
+	}
+	return util.AddHex(encodedExtrinsic), nil
 }
 
 // buildExtrinsicPayload build extrinsic payload
