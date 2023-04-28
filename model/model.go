@@ -1,4 +1,4 @@
-package rpc
+package model
 
 import (
 	"encoding/json"
@@ -48,12 +48,13 @@ type HealthResult struct {
 }
 
 type RuntimeVersion struct {
-	Apis             [][]interface{} `json:"apis"`
-	AuthoringVersion int             `json:"authoringVersion"`
-	ImplName         string          `json:"implName"`
-	ImplVersion      int             `json:"implVersion"`
-	SpecName         string          `json:"specName"`
-	SpecVersion      int             `json:"specVersion"`
+	Apis               [][]interface{} `json:"apis"`
+	AuthoringVersion   int             `json:"authoringVersion"`
+	ImplName           string          `json:"implName"`
+	ImplVersion        int             `json:"implVersion"`
+	SpecName           string          `json:"specName"`
+	SpecVersion        int             `json:"specVersion"`
+	TransactionVersion int             `json:"transactionVersion"`
 }
 
 type SystemTokenResult struct {
@@ -94,9 +95,14 @@ type Block struct {
 	Header     ChainNewHeadResult `json:"header"`
 }
 
+type AuthorExtrinsicUpdate struct {
+	Broadcast *interface{} `json:"broadcast,omitempty"`
+	InBlock   *string      `json:"inBlock,omitempty"`
+}
+
 func (p *JsonRpcResult) ToString() (string, error) {
-	if p.checkErr() != nil {
-		return "", p.checkErr()
+	if p.CheckErr() != nil {
+		return "", p.CheckErr()
 	}
 	if p.Result == nil {
 		return "", nil
@@ -105,8 +111,8 @@ func (p *JsonRpcResult) ToString() (string, error) {
 }
 
 func (p *JsonRpcResult) ToInterfaces() ([]interface{}, error) {
-	if p.checkErr() != nil {
-		return nil, p.checkErr()
+	if p.CheckErr() != nil {
+		return nil, p.CheckErr()
 	}
 	if p.Result == nil {
 		return nil, nil
@@ -115,21 +121,21 @@ func (p *JsonRpcResult) ToInterfaces() ([]interface{}, error) {
 }
 
 func (p *JsonRpcResult) ToInt() uint64 {
-	if p.checkErr() != nil {
+	if p.CheckErr() != nil {
 		return 0
 	}
 	return p.Result.(uint64)
 }
 
 func (p *JsonRpcResult) ToFloat64() float64 {
-	if p.checkErr() != nil {
+	if p.CheckErr() != nil {
 		return 0
 	}
 	return p.Result.(float64)
 }
 
 func (p *JsonRpcResult) ToRuntimeVersion() *RuntimeVersion {
-	if p.checkErr() != nil {
+	if p.CheckErr() != nil {
 		return nil
 	}
 	result := (p).Result.(map[string]interface{})
@@ -141,13 +147,13 @@ func (p *JsonRpcResult) ToRuntimeVersion() *RuntimeVersion {
 	if err != nil {
 		return nil
 	}
-	_ = json.Unmarshal([]byte(marshal), v)
+	_ = json.Unmarshal(marshal, v)
 	return v
 }
 
 func (p *JsonRpcResult) ToAnyThing(r interface{}) error {
-	if p.checkErr() != nil {
-		return p.checkErr()
+	if p.CheckErr() != nil {
+		return p.CheckErr()
 	}
 	result := (p).Result.(map[string]interface{})
 	if len(result) == 0 {
@@ -157,7 +163,7 @@ func (p *JsonRpcResult) ToAnyThing(r interface{}) error {
 	if err != nil {
 		return nilErr
 	}
-	_ = json.Unmarshal([]byte(marshal), r)
+	_ = json.Unmarshal(marshal, r)
 	return nil
 }
 
@@ -174,12 +180,26 @@ func (p *JsonRpcResult) ToStorage() (*StateStorageResult, int64) {
 	if err != nil {
 		return nil, 0
 	}
-	_ = json.Unmarshal([]byte(marshal), v)
+	_ = json.Unmarshal(marshal, v)
 	return v, 0
 }
 
+func (p *JsonRpcResult) ToAuthorExtrinsicUpdate() *AuthorExtrinsicUpdate {
+	if p.Params == nil {
+		return nil
+	}
+	result := (p).Params.Result
+	v := &AuthorExtrinsicUpdate{}
+	marshal, err := json.Marshal(result)
+	if err != nil {
+		return nil
+	}
+	_ = json.Unmarshal(marshal, v)
+	return v
+}
+
 func (p *JsonRpcResult) ToNewHead() *ChainNewHeadResult {
-	if p.checkErr() != nil {
+	if p.CheckErr() != nil {
 		return nil
 	}
 	if p.Params == nil {
@@ -194,12 +214,12 @@ func (p *JsonRpcResult) ToNewHead() *ChainNewHeadResult {
 	if err != nil {
 		return nil
 	}
-	_ = json.Unmarshal([]byte(marshal), v)
+	_ = json.Unmarshal(marshal, v)
 	return v
 }
 
 func (p *JsonRpcResult) ToSysHealth() *HealthResult {
-	if p.checkErr() != nil {
+	if p.CheckErr() != nil {
 		return nil
 	}
 	result := (p).Result.(map[string]interface{})
@@ -211,12 +231,12 @@ func (p *JsonRpcResult) ToSysHealth() *HealthResult {
 	if err != nil {
 		return nil
 	}
-	_ = json.Unmarshal([]byte(marshal), v)
+	_ = json.Unmarshal(marshal, v)
 	return v
 }
 
 func (p *JsonRpcResult) ToBlock() *BlockResult {
-	if p.checkErr() != nil {
+	if p.CheckErr() != nil {
 		return nil
 	}
 	if (p).Result == nil {
@@ -231,12 +251,12 @@ func (p *JsonRpcResult) ToBlock() *BlockResult {
 	if err != nil {
 		return nil
 	}
-	_ = json.Unmarshal([]byte(marshal), v)
+	_ = json.Unmarshal(marshal, v)
 	return v
 }
 
 func (p *JsonRpcResult) ToPaymentQueryInfo() *PaymentQueryInfo {
-	if p.checkErr() != nil {
+	if p.CheckErr() != nil {
 		return nil
 	}
 	if (p).Result == nil {
@@ -251,11 +271,11 @@ func (p *JsonRpcResult) ToPaymentQueryInfo() *PaymentQueryInfo {
 	if err != nil {
 		return nil
 	}
-	_ = json.Unmarshal([]byte(marshal), v)
+	_ = json.Unmarshal(marshal, v)
 	return v
 }
 
-func (p *JsonRpcResult) checkErr() error {
+func (p *JsonRpcResult) CheckErr() error {
 	if p.Error != nil {
 		return errors.New(p.Error.Message)
 	}

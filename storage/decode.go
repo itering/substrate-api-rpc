@@ -27,7 +27,7 @@ func Decode(raw string, decodeType string, option *types.ScaleDecoderOption) (s 
 type StateStorage string
 
 func (s *StateStorage) bytes() []byte {
-	return []byte(string(*s))
+	return []byte((*s))
 }
 
 func (s *StateStorage) string() string {

@@ -3,9 +3,10 @@ module github.com/itering/substrate-api-rpc
 go 1.16
 
 require (
+	github.com/ChainSafe/go-schnorrkel v1.0.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/huandu/xstrings v1.4.0 // indirect
-	github.com/itering/scale.go v1.5.12
+	github.com/itering/scale.go v1.6.0
 	github.com/jpillora/backoff v1.0.0
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/pierrec/xxHash v0.1.5

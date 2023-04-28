@@ -4,11 +4,10 @@
 
 - [Install](#Install)
 - [Usage](#Usage)
-   - [Codec](#Codec)
-   - [RPC](#RPC)
+    - [Codec](#Codec)
+    - [RPC](#RPC)
 - [Contributions](#Contributions)
 - [LICENSE](#LICENSE)
-
 
 ## Install
 
@@ -52,10 +51,25 @@ raw := "0x2efb"
 storage.Decode(raw, "i16", nil)
 ```
 
+### KeyRing
+
+#### Generate KeyPair
+
+```
+keyRing := keyring.New(keyring.Sr25519Type, AliceSeed) // sr25519
+keyRing := keyring.New(keyring.Ed25519Type, AliceSeed) // ed25519
+```
+
+#### Sign Message
+
+```
+keyRing.Sign("hello world") // sign utf-8 message
+keyRing.Sign("0xffff")      // sign hex message
+```
 
 ### RPC
 
-#### Substrate RPC 
+#### Substrate RPC
 
 Example
 
@@ -73,8 +87,37 @@ validatorsRaw, err := rpc.ReadStorage(conn, "Session", "Validators", blockHash)
 validatorList := validatorsRaw.ToStringSlice()
 ```
 
-More information can be viewed https://polkadot.js.org/api/substrate/rpc.html
+#### Send Extrinsic
 
+```
+// set websocket endoint 
+websocket.SetEndpoint("wss://shibuya-rpc.dwellir.com")
+
+client = &rpc.Client{}
+
+// init latest metadata
+raw, err := GetMetadataByHash(nil)
+if err != nil {
+    panic(err)
+}
+
+// set metadata
+client.SetMetadata(metadata.RegNewMetadataType(92, raw))
+
+// set sr25519 seed
+client.SetKeyRing(keyring.New(keyring.Sr25519Type, AliceSeed))
+
+// sign transaction
+signedTransaction, err := client.SignTransaction("Balances", "transfer", map[string]interface{}{"Id": BobAccountId}, 12345)
+
+// send transaction async, will return block hash
+blockHash, err := client.SendAuthorSubmitAndWatchExtrinsic(signedTransaction)
+
+// send transaction synchronize, will return transaction hash
+transactionHash, err := client.SendAuthorSubmitExtrinsic(signedTransaction)
+```
+
+More information can be viewed https://polkadot.js.org/api/substrate/rpc.html
 
 ## Contributions
 
@@ -82,4 +125,4 @@ We welcome contributions of any kind. Issues labeled can be good (first) contrib
 
 ## LICENSE
 
-GPL-3.0
+Apache-2.0

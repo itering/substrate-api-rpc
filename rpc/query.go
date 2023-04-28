@@ -4,45 +4,16 @@ import (
 	"fmt"
 	"math/rand"
 
+	"github.com/itering/substrate-api-rpc/model"
 	"github.com/itering/substrate-api-rpc/storage"
 	"github.com/itering/substrate-api-rpc/storageKey"
 	"github.com/itering/substrate-api-rpc/util"
+	"github.com/itering/substrate-api-rpc/util/ss58"
 	"github.com/itering/substrate-api-rpc/websocket"
 )
 
-// Read substrate storage
-func ReadStorage(p websocket.WsConn, module, prefix string, hash string, arg ...string) (r storage.StateStorage, err error) {
-	key := storageKey.EncodeStorageKey(module, prefix, arg...)
-	v := &JsonRpcResult{}
-	if err = websocket.SendWsRequest(p, v, StateGetStorage(rand.Intn(10000), util.AddHex(key.EncodeKey), hash)); err != nil {
-		return
-	}
-	if dataHex, err := v.ToString(); err == nil {
-		if dataHex == "" {
-			return "", nil
-		}
-		return storage.Decode(dataHex, key.ScaleType, nil)
-	}
-	return r, err
-
-}
-
-func ReadKeysPaged(p websocket.WsConn, module, prefix string) (r []string, scale string, err error) {
-	key := storageKey.EncodeStorageKey(module, prefix)
-	v := &JsonRpcResult{}
-	if err = websocket.SendWsRequest(p, v, StateGetKeysPaged(rand.Intn(10000), util.AddHex(key.EncodeKey))); err != nil {
-		return
-	}
-	if keys, err := v.ToInterfaces(); err == nil {
-		for _, k := range keys {
-			r = append(r, k.(string))
-		}
-	}
-	return r, key.ScaleType, err
-}
-
-func GetPaymentQueryInfo(p websocket.WsConn, encodedExtrinsic string) (paymentInfo *PaymentQueryInfo, err error) {
-	v := &JsonRpcResult{}
+func GetPaymentQueryInfo(p websocket.WsConn, encodedExtrinsic string) (paymentInfo *model.PaymentQueryInfo, err error) {
+	v := &model.JsonRpcResult{}
 	if err = websocket.SendWsRequest(p, v, SystemPaymentQueryInfo(rand.Intn(10000), util.AddHex(encodedExtrinsic))); err != nil {
 		return
 	}
@@ -54,7 +25,7 @@ func GetPaymentQueryInfo(p websocket.WsConn, encodedExtrinsic string) (paymentIn
 }
 
 func ReadStorageByKey(p websocket.WsConn, key storageKey.StorageKey, hash string) (r storage.StateStorage, err error) {
-	v := &JsonRpcResult{}
+	v := &model.JsonRpcResult{}
 	if err = websocket.SendWsRequest(p, v, StateGetStorage(rand.Intn(10000), key.EncodeKey, hash)); err != nil {
 		return
 	}
@@ -68,19 +39,49 @@ func ReadStorageByKey(p websocket.WsConn, key storageKey.StorageKey, hash string
 }
 
 func GetMetadataByHash(p websocket.WsConn, hash ...string) (string, error) {
-	v := &JsonRpcResult{}
+	v := &model.JsonRpcResult{}
 	if err := websocket.SendWsRequest(p, v, StateGetMetadata(rand.Intn(10), hash...)); err != nil {
 		return "", err
 	}
 	return v.ToString()
 }
 
-func GetSystemProperties(p websocket.WsConn) (*Properties, error) {
-	var t Properties
-	v := &JsonRpcResult{}
+func GetSystemProperties(p websocket.WsConn) (*model.Properties, error) {
+	var t model.Properties
+	v := &model.JsonRpcResult{}
 	if err := websocket.SendWsRequest(p, v, SystemProperties(rand.Intn(1000))); err != nil {
 		return nil, err
 	}
 	err := v.ToAnyThing(&t)
 	return &t, err
+}
+
+func GetChainGetBlockHash(p websocket.WsConn, blockNum int) (string, error) {
+	v := &model.JsonRpcResult{}
+	if err := websocket.SendWsRequest(p, v, ChainGetBlockHash(rand.Intn(1000), blockNum)); err != nil {
+		return "", err
+	}
+	return v.ToString()
+}
+
+func GetStateGetRuntimeVersion(p websocket.WsConn, hash string) *model.RuntimeVersion {
+	v := &model.JsonRpcResult{}
+	if err := websocket.SendWsRequest(p, v, StateGetRuntimeVersion(rand.Intn(1000), hash)); err != nil {
+		return nil
+	}
+	if err := v.CheckErr(); err != nil {
+		return nil
+	}
+	return v.ToRuntimeVersion()
+}
+
+func GetSystemAccountNextIndex(p websocket.WsConn, accountId string) uint64 {
+	v := &model.JsonRpcResult{}
+	if err := websocket.SendWsRequest(p, v, SystemAccountNextIndex(rand.Intn(1000), ss58.Encode(accountId, 42))); err != nil {
+		return 0
+	}
+	if err := v.CheckErr(); err != nil {
+		return 0
+	}
+	return uint64(v.ToFloat64())
 }

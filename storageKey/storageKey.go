@@ -45,23 +45,17 @@ func EncodeStorageKey(section, method string, args ...string) (storageKey Storag
 
 	hash = append(sectionHash, methodHash[:]...)
 
-	if len(args) > 0 {
-		var param []byte
-		param = append(param, hasher.HashByCryptoName(util.HexToBytes(args[0]), mapType.Hasher)...)
-		if len(args) == 2 {
-			param = append(param, hasher.HashByCryptoName(util.HexToBytes(args[1]), mapType.Hasher2)...)
-		}
-		hash = append(hash, param[:]...)
+	for index, arg := range args {
+		hash = append(hash, hasher.HashByCryptoName(util.HexToBytes(arg), mapType.Hasher[index])[:]...)
 	}
 	storageKey.EncodeKey = util.BytesToHex(hash)
 	return
 }
 
 type storageOption struct {
-	Value    string `json:"value"`
-	Hasher   string `json:"hasher"`
-	Hasher2  string `json:"hasher_2"`
-	IsLinked bool   `json:"is_linked"`
+	Value  string   `json:"value"`
+	Keys   []string `json:"keys"`
+	Hasher []string `json:"hasher"`
 }
 
 func checkoutHasherAndType(t *types.StorageType) *storageOption {
@@ -69,23 +63,18 @@ func checkoutHasherAndType(t *types.StorageType) *storageOption {
 	switch t.Origin {
 	case "MapType":
 		option.Value = t.MapType.Value
-		option.Hasher = t.MapType.Hasher
+		option.Hasher = []string{t.MapType.Hasher}
 	case "DoubleMapType":
 		option.Value = t.DoubleMapType.Value
-		option.Hasher = t.DoubleMapType.Hasher
-		option.Hasher2 = t.DoubleMapType.Key2Hasher
-		option.IsLinked = t.DoubleMapType.IsLinked
+		option.Keys = []string{t.DoubleMapType.Key, t.DoubleMapType.Key2}
+		option.Hasher = []string{t.DoubleMapType.Hasher, t.DoubleMapType.Key2Hasher}
 	case "Map":
 		option.Value = t.NMapType.Value
-		if len(t.NMapType.Hashers) == 1 {
-			option.Hasher = t.NMapType.Hashers[0]
-		}
-		if len(t.NMapType.Hashers) == 2 {
-			option.Hasher2 = t.NMapType.Hashers[1]
-		}
+		option.Keys = t.NMapType.KeyVec
+		option.Hasher = t.NMapType.Hashers
 	default:
 		option.Value = *t.PlainType
-		option.Hasher = "Twox64Concat"
+		option.Hasher = []string{"Twox64Concat"}
 	}
 	return &option
 }
