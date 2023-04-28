@@ -25,7 +25,7 @@ func DecodeExtrinsic(rawList []string, metadata *metadata.Instant, spec int) (r 
 		option := types.ScaleDecoderOption{Metadata: &m, Spec: spec}
 		e.Init(scaleBytes.ScaleBytes{Data: util.HexToBytes(extrinsicRaw)}, &option)
 		e.Process()
-		r = append(r, e.Value.(map[string]interface{}))
+		r = append(r, e.Value.(*scale.GenericExtrinsic).ToMap())
 	}
 	return
 }
