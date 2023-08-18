@@ -3,6 +3,7 @@ package rpc
 import (
 	"errors"
 	"fmt"
+	"github.com/itering/scale.go/utiles"
 	"math/rand"
 
 	gorilla "github.com/gorilla/websocket"
@@ -49,7 +50,7 @@ func (cl *Client) SendAuthorSubmitAndWatchExtrinsic(signedExtrinsic string) (str
 		defer p.Close() // nolint: errcheck
 		cl.p = p.Conn
 	}
-	if err = p.Conn.WriteMessage(gorilla.TextMessage, AuthorSubmitAndWatchExtrinsic(rand.Intn(1000), signedExtrinsic)); err != nil {
+	if err = cl.p.WriteMessage(gorilla.TextMessage, AuthorSubmitAndWatchExtrinsic(rand.Intn(1000), signedExtrinsic)); err != nil {
 		if p != nil {
 			p.MarkUnusable()
 		}
@@ -124,7 +125,6 @@ func (cl *Client) SignTransaction(moduleName, callName string, args ...interface
 
 	// encode call
 	encodeCall := types.EncodeWithOpt("Call", map[string]interface{}{"call_index": call.Lookup, "params": params}, opt)
-
 	// build extrinsic
 	genericExtrinsic := &scalecodec.GenericExtrinsic{
 		VersionInfo: TxVersionInfo,
@@ -132,6 +132,9 @@ func (cl *Client) SignTransaction(moduleName, callName string, args ...interface
 		Era:         "00", Nonce: int(GetSystemAccountNextIndex(cl.p, cl.keyRing.PublicKey())),
 		Params:   params,
 		CallCode: call.Lookup,
+	}
+	if util.StringInSlice("ChargeAssetTxPayment", metadataStruct.Extrinsic.SignedIdentifier) {
+		genericExtrinsic.SignedExtensions = map[string]interface{}{"ChargeAssetTxPayment": map[string]interface{}{"tip": 0, "asset_id": nil}}
 	}
 
 	// build payload
@@ -166,12 +169,21 @@ func (cl *Client) buildExtrinsicPayload(encodeCall string, genericExtrinsic *sca
 		return "", NetworkErr
 	}
 	data := encodeCall
-	data = data + types.Encode("EraExtrinsic", genericExtrinsic.Era)     // era
-	data = data + types.Encode("Compact<U32>", genericExtrinsic.Nonce)   // nonce
-	data = data + types.Encode("Compact<Balance>", genericExtrinsic.Tip) // tip
-	data = data + types.Encode("U32", version.SpecVersion)               // specVersion
-	data = data + types.Encode("U32", version.TransactionVersion)        // transactionVersion
-	data = data + util.TrimHex(types.Encode("Hash", genesisHash))        // genesisHash
-	data = data + util.TrimHex(types.Encode("Hash", genesisHash))        // blockHash
+	data = data + types.Encode("EraExtrinsic", genericExtrinsic.Era)   // era
+	data = data + types.Encode("Compact<U32>", genericExtrinsic.Nonce) // nonce
+	if len(cl.metadata.Extrinsic.SignedIdentifier) > 0 && utiles.SliceIndex("ChargeTransactionPayment", cl.metadata.Extrinsic.SignedIdentifier) > -1 {
+		data = data + types.Encode("Compact<Balance>", genericExtrinsic.Tip) // tip
+	}
+	for identifier, extension := range genericExtrinsic.SignedExtensions {
+		for _, ext := range cl.metadata.Extrinsic.SignedExtensions {
+			if ext.Identifier == identifier {
+				data = data + types.Encode(ext.TypeString, extension)
+			}
+		}
+	}
+	data = data + types.Encode("U32", version.SpecVersion)        // specVersion
+	data = data + types.Encode("U32", version.TransactionVersion) // transactionVersion
+	data = data + util.TrimHex(types.Encode("Hash", genesisHash)) // genesisHash
+	data = data + util.TrimHex(types.Encode("Hash", genesisHash)) // blockHash
 	return data, nil
 }

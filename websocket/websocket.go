@@ -31,8 +31,8 @@ func Init(options ...Option) (*PoolConn, error) {
 		factory := func() (*recws.RecConn, error) {
 			SubscribeConn := &recws.RecConn{
 				KeepAliveTimeout: 10 * time.Second,
-				WriteTimeout:     time.Second * 10,
-				ReadTimeout:      time.Second * 10,
+				WriteTimeout:     time.Second * 30,
+				ReadTimeout:      time.Second * 30,
 				NonVerbose:       true,
 				HandshakeTimeout: time.Second * 5}
 			for _, o := range options {
@@ -64,6 +64,7 @@ func SetChannelPoolMaxCap(max int) {
 func Close() {
 	if wsPool != nil {
 		wsPool.Close()
+		wsPool = nil
 	}
 }
 

@@ -18,7 +18,7 @@ const (
 var client *Client
 
 func init() {
-	websocket.SetEndpoint("wss://shibuya-rpc.dwellir.com")
+	websocket.SetEndpoint("wss://rpc.shibuya.astar.network")
 	// websocket init and set metadata
 	_, err := websocket.Init()
 	if err != nil {
