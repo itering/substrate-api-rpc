@@ -18,7 +18,7 @@ const (
 var client *Client
 
 func init() {
-	websocket.SetEndpoint("wss://rpc.shibuya.astar.network")
+	websocket.SetEndpoint("wss://rococo-asset-hub-rpc.polkadot.io")
 	// websocket init and set metadata
 	_, err := websocket.Init()
 	if err != nil {
@@ -48,7 +48,7 @@ func Test_SignAndSendTransaction(t *testing.T) {
 	var bobAccount1 SystemAccountInfo
 	bobAccountRaw.ToAny(&bobAccount1)
 
-	signedTransaction, err := client.SignTransaction("Balances", "transfer", map[string]interface{}{"Id": BobAccountId}, 12345)
+	signedTransaction, err := client.SignTransaction("Balances", "transfer_keep_alive", map[string]interface{}{"Id": BobAccountId}, 12345)
 	assert.NoError(t, err)
 
 	// async, will return until the transaction is in the block, and return the hash of the block
@@ -63,7 +63,7 @@ func Test_SignAndSendTransaction(t *testing.T) {
 	assert.Equal(t, bobAccount2.Data.Free.Sub(bobAccount1.Data.Free).String(), "12345")
 
 	// Synchronize, will return the hash of the transaction
-	signedTransaction, err = client.SignTransaction("Balances", "transfer", map[string]interface{}{"Id": BobAccountId}, 23456)
+	signedTransaction, err = client.SignTransaction("Balances", "transfer_keep_alive", map[string]interface{}{"Id": BobAccountId}, 12345)
 	assert.NoError(t, err)
 	hash, err := client.SendAuthorSubmitExtrinsic(signedTransaction)
 	assert.NoError(t, err)

@@ -133,8 +133,12 @@ func (cl *Client) SignTransaction(moduleName, callName string, args ...interface
 		Params:   params,
 		CallCode: call.Lookup,
 	}
+	genericExtrinsic.SignedExtensions = make(map[string]interface{})
 	if util.StringInSlice("ChargeAssetTxPayment", metadataStruct.Extrinsic.SignedIdentifier) {
-		genericExtrinsic.SignedExtensions = map[string]interface{}{"ChargeAssetTxPayment": map[string]interface{}{"tip": 0, "asset_id": nil}}
+		genericExtrinsic.SignedExtensions["ChargeAssetTxPayment"] = map[string]interface{}{"tip": 0, "asset_id": nil}
+	}
+	if util.StringInSlice("CheckMetadataHash", metadataStruct.Extrinsic.SignedIdentifier) {
+		genericExtrinsic.SignedExtensions["CheckMetadataHash"] = "Disabled"
 	}
 
 	// build payload
@@ -174,6 +178,7 @@ func (cl *Client) buildExtrinsicPayload(encodeCall string, genericExtrinsic *sca
 	if len(cl.metadata.Extrinsic.SignedIdentifier) > 0 && utiles.SliceIndex("ChargeTransactionPayment", cl.metadata.Extrinsic.SignedIdentifier) > -1 {
 		data = data + types.Encode("Compact<Balance>", genericExtrinsic.Tip) // tip
 	}
+	fmt.Println(cl.metadata.Extrinsic.SignedExtensions)
 	for identifier, extension := range genericExtrinsic.SignedExtensions {
 		for _, ext := range cl.metadata.Extrinsic.SignedExtensions {
 			if ext.Identifier == identifier {
@@ -185,5 +190,9 @@ func (cl *Client) buildExtrinsicPayload(encodeCall string, genericExtrinsic *sca
 	data = data + types.Encode("U32", version.TransactionVersion) // transactionVersion
 	data = data + util.TrimHex(types.Encode("Hash", genesisHash)) // genesisHash
 	data = data + util.TrimHex(types.Encode("Hash", genesisHash)) // blockHash
+
+	if _, ok := genericExtrinsic.SignedExtensions["CheckMetadataHash"]; ok {
+		data = data + util.TrimHex("00") // CheckMetadataHash
+	}
 	return data, nil
 }
