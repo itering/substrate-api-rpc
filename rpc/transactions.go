@@ -178,7 +178,7 @@ func (cl *Client) buildExtrinsicPayload(encodeCall string, genericExtrinsic *sca
 	if len(cl.metadata.Extrinsic.SignedIdentifier) > 0 && utiles.SliceIndex("ChargeTransactionPayment", cl.metadata.Extrinsic.SignedIdentifier) > -1 {
 		data = data + types.Encode("Compact<Balance>", genericExtrinsic.Tip) // tip
 	}
-	fmt.Println(cl.metadata.Extrinsic.SignedExtensions)
+
 	for identifier, extension := range genericExtrinsic.SignedExtensions {
 		for _, ext := range cl.metadata.Extrinsic.SignedExtensions {
 			if ext.Identifier == identifier {
