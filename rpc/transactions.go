@@ -152,7 +152,7 @@ func (cl *Client) SignTransaction(moduleName, callName string, args ...interface
 		payload = util.BytesToHex(hasher.HashByCryptoName(util.HexToBytes(payload), "Blake2_256"))
 	}
 	// sign payload
-	genericExtrinsic.SignatureRaw = map[string]interface{}{string(cl.keyRing.Type()): cl.keyRing.Sign(util.AddHex(payload))}
+	genericExtrinsic.SignatureRaw = map[string]interface{}{string(cl.keyRing.Type()): utiles.AddHex(cl.keyRing.Sign(util.AddHex(payload)))}
 
 	// send extrinsic will return hash
 	encodedExtrinsic, err := genericExtrinsic.Encode(opt)
